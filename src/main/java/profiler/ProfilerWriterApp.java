@@ -35,7 +35,7 @@ public class ProfilerWriterApp {
             String virtualMemoryData = service.getMemory();
             for (HashGeneratorWithTimer generator : hashGenerators) {
                 long t1 = System.nanoTime();
-                String hash = generator.getHash(virtualMemoryData);
+                String hash = generator.getHash(virtualMemoryData).replaceAll("[\\r\\n]+", "");
                 client.writeHash(hash, virtualMemoryData, generator.getHashName());
                 writeOsDataToFile(hash, String.valueOf(i), HASHED_PATH + generator.getHashName() + "/");
                 generator.addTime(System.nanoTime() - t1);
