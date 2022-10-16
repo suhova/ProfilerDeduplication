@@ -4,6 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import static profiler.hash.HashGenerators.SHA512;
+
 public class Sha512HashGenerator extends HashGeneratorWithTimer {
     @Override
     public String getHash(String value) {
