@@ -1,7 +1,7 @@
-package profiler.service;
+package deduplicator.service;
 
-import profiler.db.DbClient;
-import profiler.hash.HashGeneratorWithTimer;
+import deduplicator.db.DbClient;
+import deduplicator.hash.HashGeneratorWithTimer;
 
 import java.io.BufferedWriter;
 import java.io.FileInputStream;

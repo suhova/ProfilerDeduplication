@@ -1,4 +1,4 @@
-package profiler.hash;
+package deduplicator.hash;
 
 public enum HashGenerators {
     MD5(new Md5HashGenerator()),

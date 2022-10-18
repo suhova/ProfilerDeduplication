@@ -1,16 +1,14 @@
-package profiler.hash;
+package deduplicator.hash;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static profiler.hash.HashGenerators.SHA512;
-
-public class Sha512HashGenerator extends HashGeneratorWithTimer {
+public class Md5HashGenerator extends HashGeneratorWithTimer{
     @Override
     public String getHash(String value) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(value.getBytes(StandardCharsets.UTF_8));
             byte[] digest = md.digest();
             return new String(digest);
@@ -22,6 +20,6 @@ public class Sha512HashGenerator extends HashGeneratorWithTimer {
 
     @Override
     public String getHashName() {
-        return "sha512";
+        return "md5";
     }
 }

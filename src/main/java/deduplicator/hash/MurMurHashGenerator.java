@@ -1,8 +1,7 @@
-package profiler.hash;
+package deduplicator.hash;
 
 
 import static com.google.common.hash.Hashing.murmur3_128;
-import static profiler.hash.HashGenerators.MURMUR;
 
 public class MurMurHashGenerator extends HashGeneratorWithTimer {
     @Override

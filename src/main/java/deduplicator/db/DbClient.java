@@ -1,4 +1,4 @@
-package profiler.db;
+package deduplicator.db;
 
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoClient;

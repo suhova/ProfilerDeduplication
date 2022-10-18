@@ -1,4 +1,4 @@
-package profiler.hash;
+package deduplicator.hash;
 
 public abstract class HashGeneratorWithTimer implements HashGenerator {
     private long time;
