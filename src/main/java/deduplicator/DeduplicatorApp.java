@@ -9,31 +9,47 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.List;
 
-import static deduplicator.hash.HashGenerators.MD5;
+import static deduplicator.hash.HashGenerators.*;
 
 public class DeduplicatorApp {
-    public static final int BLOCK_SIZE = 400;
-    private static final int MAX_POSITION_IN_FILE = 1280;
-    private static final boolean CALCULATE_MISTAKES = true;
-    private static DbClient client;
+    private static boolean CALCULATE_MISTAKES = true;
+    public static int BLOCK_SIZE = 400;
+    private static int MAX_POSITION_IN_FILE = 1280;
     private static HashGeneratorWithTimer hashGenerator = MD5.generator;
+    private static DbClient client;
     public static final String SEPARATOR = "#";
     public static final String WAREHOUSE_PATH = "./target/warehouse/";
     public static final String DATA_PATH = "./datamini.csv";
     public static final String HASHED_PATH = "./target/warehouse/hashed/";
     public static final String ORIGINAL_PATH = "./target/warehouse/original/";
+    public static final String REPORT_PATH = "./report";
 
     public static void main(String[] args) {
-        init();
-
-        WriterService writer = new WriterService(hashGenerator, HASHED_PATH, ORIGINAL_PATH);
-        writer.startWriting(BLOCK_SIZE, MAX_POSITION_IN_FILE, SEPARATOR, DATA_PATH, client);
-        ReaderService reader = new ReaderService(CALCULATE_MISTAKES);
-        reader.read(HASHED_PATH + hashGenerator.getHashName() + "/", hashGenerator.getHashName(), client, ORIGINAL_PATH, SEPARATOR, WAREHOUSE_PATH, DATA_PATH, BLOCK_SIZE);
-        generateWriterReport(writer.getUniqueValues(), writer.getTimeOfOriginalDataWriting(), writer.getTimeOfHashedDataWriting());
-        generateReaderReport(reader.getErrorCount(), reader.getOriginalReadingTime(), reader.getHashReadingTime());
+        List<Integer> blockSizes = List.of(64, 128, 256, 1024, 2048, 4096, 8192);
+        List<Integer> maxPositionsInFile = List.of(64, 356, 1024, 2048);
+        List<HashGeneratorWithTimer> generators = List.of(
+            MURMUR.generator
+        );
+        for (HashGeneratorWithTimer g : generators) {
+            hashGenerator = g;
+            for (int bs : blockSizes) {
+                BLOCK_SIZE = bs;
+                for (int m : maxPositionsInFile) {
+                    MAX_POSITION_IN_FILE = m;
+                    init();
+                    WriterService writer = new WriterService(hashGenerator, HASHED_PATH, ORIGINAL_PATH);
+                    writer.startWriting(BLOCK_SIZE, MAX_POSITION_IN_FILE, SEPARATOR, DATA_PATH, client);
+                    ReaderService reader = new ReaderService(CALCULATE_MISTAKES);
+                    reader.read(HASHED_PATH + hashGenerator.getHashName() + "/", hashGenerator.getHashName(), client, ORIGINAL_PATH, SEPARATOR, WAREHOUSE_PATH, DATA_PATH, BLOCK_SIZE);
+                    generateWriterReport(writer.getUniqueValues(), writer.getTimeOfOriginalDataWriting(), writer.getTimeOfHashedDataWriting(), getFolderSize(new File(HASHED_PATH + hashGenerator.getHashName())));
+                    generateReaderReport(reader.getErrorCount(), reader.getOriginalReadingTime(), reader.getHashReadingTime(), client.getStats(hashGenerator.getHashName()));
+                }
+            }
+        }
     }
 
     private static void init() {
@@ -63,34 +79,52 @@ public class DeduplicatorApp {
         }
     }
 
-    private static void generateWriterReport(int duplicates, long timeOfOriginalDataWriting, long timeOfHashedDataWriting) {
+    private static void generateWriterReport(int duplicates, long timeOfOriginalDataWriting, long timeOfHashedDataWriting, long folderSize) {
         StringBuilder builder = new StringBuilder()
             .append("\nWRITING:")
             .append("\nBlock's size: ").append(BLOCK_SIZE)
             .append("\nMax position in file: ").append(MAX_POSITION_IN_FILE)
             .append("\nUnique values: ").append(duplicates)
+            .append("\nFolder size: ").append(folderSize)
             .append("\nTime of original data writing: ").append(timeOfOriginalDataWriting)
-            .append("\nTime of ").append(hashGenerator.getHashName()).append(":").append(hashGenerator.getTime() + timeOfHashedDataWriting);
+            .append("\nTime of ").append(hashGenerator.getHashName()).append(": ").append(hashGenerator.getTime() + timeOfHashedDataWriting);
 
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(WAREHOUSE_PATH + "report"))) {
-            bw.write(builder.toString());
+        try (PrintWriter bw = new PrintWriter(new BufferedWriter(new FileWriter(REPORT_PATH, true)))) {
+            bw.println(builder.toString());
             System.out.println(builder.toString());
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
     }
-    private static void generateReaderReport(int errorCount, long timeOfOriginalDataReading, long timeOfHashedDataReading) {
+
+    private static void generateReaderReport(int errorCount, long timeOfOriginalDataReading, long timeOfHashedDataReading, int storageSize) {
         StringBuilder builder = new StringBuilder()
             .append("\nREADING:")
             .append("\nError count: ").append(errorCount)
             .append("\nTime of original data reading: ").append(timeOfOriginalDataReading)
-            .append("\nTime of hashed data reading:").append(timeOfHashedDataReading);
+            .append("\nTime of hashed data reading: ").append(timeOfHashedDataReading)
+            .append("\nBD storage size: ").append(storageSize);
 
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(WAREHOUSE_PATH + "reportRead"))) {
-            bw.write(builder.toString());
+        try (PrintWriter bw = new PrintWriter(new BufferedWriter(new FileWriter(REPORT_PATH, true)))) {
+            bw.println(builder.toString());
             System.out.println(builder.toString());
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+    private static long getFolderSize(File folder) {
+        long length = 0;
+        File[] files = folder.listFiles();
+        int count = files.length;
+        for (int i = 0; i < count; i++) {
+            if (files[i].isFile()) {
+                length += files[i].length();
+            }
+            else {
+                length += getFolderSize(files[i]);
+            }
+        }
+        return length;
     }
 }

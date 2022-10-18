@@ -16,9 +16,8 @@ public class DbClient {
     }
 
     public void clearCollection(String collectionName) {
-        client.getDatabase(DB_NAME)
-            .getCollection(collectionName)
-            .deleteMany(new Document());
+        client.getDatabase(DB_NAME).getCollection(collectionName).drop();
+        client.getDatabase(DB_NAME).createCollection(collectionName);
     }
 
     public void writeHash(String hash, int file, int position, String collectionName) {
@@ -65,5 +64,11 @@ public class DbClient {
             .first();
         assert res != null;
         return new int[]{res.getInteger("file"), res.getInteger("position")};
+    }
+
+    public int getStats(String collection) {
+        return client.getDatabase(DB_NAME)
+            .runCommand(new Document("collStats", collection))
+            .getInteger("size");
     }
 }
