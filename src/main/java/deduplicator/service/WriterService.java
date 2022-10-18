@@ -2,11 +2,14 @@ package deduplicator.service;
 
 import deduplicator.db.DbClient;
 import deduplicator.hash.HashGeneratorWithTimer;
+import org.apache.commons.compress.compressors.lz4.BlockLZ4CompressorOutputStream;
 
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
@@ -74,7 +77,7 @@ public class WriterService {
     }
 
     private static void writeDataToFile(String data, int file, String dir) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(dir + file, StandardCharsets.UTF_8))) {
+        try (PrintWriter bw = new PrintWriter(new BlockLZ4CompressorOutputStream(new FileOutputStream(dir + file)))) {
             bw.write(data);
         } catch (IOException ex) {
             System.out.println(ex.getMessage());

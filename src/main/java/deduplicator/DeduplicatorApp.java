@@ -13,10 +13,11 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import static deduplicator.hash.HashGenerators.*;
+import static deduplicator.hash.HashGenerators.MD5;
+import static deduplicator.hash.HashGenerators.MURMUR;
 
 public class DeduplicatorApp {
-    private static boolean CALCULATE_MISTAKES = true;
+    private static boolean CALCULATE_MISTAKES = false;
     public static int BLOCK_SIZE = 400;
     private static int MAX_POSITION_IN_FILE = 1280;
     private static HashGeneratorWithTimer hashGenerator = MD5.generator;
@@ -29,8 +30,8 @@ public class DeduplicatorApp {
     public static final String REPORT_PATH = "./report";
 
     public static void main(String[] args) {
-        List<Integer> blockSizes = List.of(64, 128, 256, 1024, 2048, 4096, 8192);
-        List<Integer> maxPositionsInFile = List.of(64, 356, 1024, 2048);
+        List<Integer> blockSizes = List.of(256);
+        List<Integer> maxPositionsInFile = List.of(1024);
         List<HashGeneratorWithTimer> generators = List.of(
             MURMUR.generator
         );
@@ -88,7 +89,6 @@ public class DeduplicatorApp {
             .append("\nFolder size: ").append(folderSize)
             .append("\nTime of original data writing: ").append(timeOfOriginalDataWriting)
             .append("\nTime of ").append(hashGenerator.getHashName()).append(": ").append(hashGenerator.getTime() + timeOfHashedDataWriting);
-
         try (PrintWriter bw = new PrintWriter(new BufferedWriter(new FileWriter(REPORT_PATH, true)))) {
             bw.println(builder.toString());
             System.out.println(builder.toString());
@@ -120,8 +120,7 @@ public class DeduplicatorApp {
         for (int i = 0; i < count; i++) {
             if (files[i].isFile()) {
                 length += files[i].length();
-            }
-            else {
+            } else {
                 length += getFolderSize(files[i]);
             }
         }

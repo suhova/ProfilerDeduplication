@@ -1,6 +1,7 @@
 package deduplicator.service;
 
 import deduplicator.db.DbClient;
+import org.apache.commons.compress.compressors.lz4.BlockLZ4CompressorInputStream;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 public class ReaderService {
@@ -29,7 +31,7 @@ public class ReaderService {
             String fileName = file.getName();
 
             try (
-                BufferedReader br = new BufferedReader(new FileReader(dir + "/" + fileName, StandardCharsets.UTF_8));
+                BufferedReader br = new BufferedReader(new InputStreamReader(new BlockLZ4CompressorInputStream(new FileInputStream(dir + "/" + fileName))));
                 FileInputStream is = new FileInputStream(sourceFilePath)
             ) {
                 if (calculateMistakes) {
