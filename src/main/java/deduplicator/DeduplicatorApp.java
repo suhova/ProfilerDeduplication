@@ -13,14 +13,13 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import static deduplicator.hash.HashGenerators.MD5;
-import static deduplicator.hash.HashGenerators.MURMUR;
+import static deduplicator.hash.HashGenerators.*;
 
 public class DeduplicatorApp {
     private static boolean CALCULATE_MISTAKES = false;
-    public static int BLOCK_SIZE = 400;
-    private static int MAX_POSITION_IN_FILE = 1280;
-    private static HashGeneratorWithTimer hashGenerator = MD5.generator;
+    public static int BLOCK_SIZE;
+    private static int MAX_POSITION_IN_FILE;
+    private static HashGeneratorWithTimer hashGenerator;
     private static DbClient client;
     public static final String SEPARATOR = "#";
     public static final String WAREHOUSE_PATH = "./target/warehouse/";
@@ -30,14 +29,9 @@ public class DeduplicatorApp {
     public static final String REPORT_PATH = "./report";
 
     public static void main(String[] args) {
-        List<Integer> blockSizes = List.of(//16, 32, 64,
-             4,6,8,16,32,64
-        );
-        List<Integer> maxPositionsInFile = List.of(256//, 2048, 10000000
-        );
-        List<HashGeneratorWithTimer> generators = List.of(
-            MURMUR.generator
-        );
+        List<Integer> blockSizes = List.of(16, 32, 64);
+        List<Integer> maxPositionsInFile = List.of(20);
+        List<HashGeneratorWithTimer> generators = List.of(MURMUR.generator);
         for (HashGeneratorWithTimer g : generators) {
             hashGenerator = g;
             for (int bs : blockSizes) {
@@ -48,7 +42,7 @@ public class DeduplicatorApp {
                     WriterService writer = new WriterService(hashGenerator, HASHED_PATH);
                     writer.startWriting(BLOCK_SIZE, MAX_POSITION_IN_FILE, SEPARATOR, DATA_PATH, client);
                     ReaderService reader = new ReaderService(CALCULATE_MISTAKES);
-                    reader.read(HASHED_PATH + hashGenerator.getHashName() + "/", hashGenerator.getHashName(), client, ORIGINAL_PATH, SEPARATOR, WAREHOUSE_PATH, DATA_PATH, BLOCK_SIZE);
+                    reader.read(HASHED_PATH + hashGenerator.getHashName() + "/", hashGenerator.getHashName(), client, SEPARATOR, WAREHOUSE_PATH, DATA_PATH, BLOCK_SIZE);
                     generateWriterReport(writer.getUniqueValues(), writer.getDuplicates(), writer.getTimeOfHashedDataWriting(), getFolderSize(new File(HASHED_PATH + hashGenerator.getHashName())));
                     generateReaderReport(reader.getErrorCount(),reader.getHashReadingTime(), client.getStats(hashGenerator.getHashName()));
                 }

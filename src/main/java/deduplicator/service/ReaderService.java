@@ -22,7 +22,7 @@ public class ReaderService {
         this.calculateMistakes = calculateMistakes;
     }
 
-    public void read(String hashedPath, String hashName, DbClient client, String originalPath, String separator,
+    public void read(String hashedPath, String hashName, DbClient client, String separator,
                      String warehousePath, String sourceFilePath, int blockSize) {
         File dir = new File(hashedPath);
         StringBuilder dataFromHash = new StringBuilder();
