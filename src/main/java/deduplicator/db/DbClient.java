@@ -69,6 +69,6 @@ public class DbClient {
     public int getStats(String collection) {
         return client.getDatabase(DB_NAME)
             .runCommand(new Document("collStats", collection))
-            .getInteger("size");
+            .getInteger("storageSize");
     }
 }

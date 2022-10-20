@@ -22,6 +22,7 @@ public class WriterService {
     private long timeOfOriginalDataWriting = 0;
     private long timeOfHashedDataWriting = 0;
     private int uniqueValues = 0;
+    private int duplicates = 0;
 
     public WriterService(HashGeneratorWithTimer hashGenerator, String hashedPath, String originalPath) {
         this.hashGenerator = hashGenerator;
@@ -48,17 +49,18 @@ public class WriterService {
                 if (isHashExists) {
                     stringBuilderHash.append(hash).append(separator).append("\n");
                     client.updateHashCounter(hash, hashGenerator.getHashName());
+                    duplicates++;
                 } else {
                     stringBuilderHash.append(data).append(separator).append("\n");
                     client.writeHash(hash, file, position, hashGenerator.getHashName());
                 }
                 hashGenerator.addTime(System.nanoTime() - t1);
                 position++;
-                if (position > maxPositionInFile) {
-                    position = 0;
-                    writeToFile(stringBuilderOriginal.toString(), stringBuilderHash.toString(), file);
-                    file++;
-                }
+//                if (position > maxPositionInFile) {
+//                    position = 0;
+//                    writeToFile(stringBuilderOriginal.toString(), stringBuilderHash.toString(), file);
+//                    file++;
+//                }
             }
             writeToFile(stringBuilderOriginal.toString(), stringBuilderHash.toString(), file);
         } catch (IOException e) {
@@ -69,9 +71,9 @@ public class WriterService {
 
     private void writeToFile(String data, String hashData, int file) {
         long t1 = System.nanoTime();
-        writeDataToFile(data, file, originalPath);
-        timeOfOriginalDataWriting += System.nanoTime() - t1;
-        t1 = System.nanoTime();
+//        writeDataToFile(data, file, originalPath);
+//        timeOfOriginalDataWriting += System.nanoTime() - t1;
+//        t1 = System.nanoTime();
         writeDataToFile(hashData, file, hashedPath + hashGenerator.getHashName() + "/");
         timeOfHashedDataWriting += System.nanoTime() - t1;
     }
@@ -94,6 +96,9 @@ public class WriterService {
 
     public int getUniqueValues() {
         return uniqueValues;
+    }
+    public int getDuplicates() {
+        return duplicates;
     }
 }
 

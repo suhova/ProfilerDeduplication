@@ -60,10 +60,9 @@ public class ReaderService {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            long t1 = System.nanoTime();
-            readOriginalDataFromFile(file.getName(), originalPath);
-            originalReadingTime += System.nanoTime() - t1;
+//            long t1 = System.nanoTime();
+//            readOriginalDataFromFile(file.getName(), originalPath);
+//            originalReadingTime += System.nanoTime() - t1;
         }
         writeToFile(warehousePath, dataFromHash.toString());
     }
