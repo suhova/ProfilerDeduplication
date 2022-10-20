@@ -15,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 
 public class ReaderService {
     private long hashReadingTime = 0;
-    private long originalReadingTime = 0;
     private int errorCount = 0;
     private final boolean calculateMistakes;
 
@@ -60,9 +59,6 @@ public class ReaderService {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-//            long t1 = System.nanoTime();
-//            readOriginalDataFromFile(file.getName(), originalPath);
-//            originalReadingTime += System.nanoTime() - t1;
         }
         writeToFile(warehousePath, dataFromHash.toString());
     }
@@ -130,10 +126,6 @@ public class ReaderService {
 
     public long getHashReadingTime() {
         return hashReadingTime;
-    }
-
-    public long getOriginalReadingTime() {
-        return originalReadingTime;
     }
 
     public int getErrorCount() {

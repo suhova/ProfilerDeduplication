@@ -45,12 +45,12 @@ public class DeduplicatorApp {
                 for (int m : maxPositionsInFile) {
                     MAX_POSITION_IN_FILE = m;
                     init();
-                    WriterService writer = new WriterService(hashGenerator, HASHED_PATH, ORIGINAL_PATH);
+                    WriterService writer = new WriterService(hashGenerator, HASHED_PATH);
                     writer.startWriting(BLOCK_SIZE, MAX_POSITION_IN_FILE, SEPARATOR, DATA_PATH, client);
                     ReaderService reader = new ReaderService(CALCULATE_MISTAKES);
                     reader.read(HASHED_PATH + hashGenerator.getHashName() + "/", hashGenerator.getHashName(), client, ORIGINAL_PATH, SEPARATOR, WAREHOUSE_PATH, DATA_PATH, BLOCK_SIZE);
-                    generateWriterReport(writer.getUniqueValues(), writer.getDuplicates(), writer.getTimeOfOriginalDataWriting(), writer.getTimeOfHashedDataWriting(), getFolderSize(new File(HASHED_PATH + hashGenerator.getHashName())));
-                    generateReaderReport(reader.getErrorCount(), reader.getOriginalReadingTime(), reader.getHashReadingTime(), client.getStats(hashGenerator.getHashName()));
+                    generateWriterReport(writer.getUniqueValues(), writer.getDuplicates(), writer.getTimeOfHashedDataWriting(), getFolderSize(new File(HASHED_PATH + hashGenerator.getHashName())));
+                    generateReaderReport(reader.getErrorCount(),reader.getHashReadingTime(), client.getStats(hashGenerator.getHashName()));
                 }
             }
         }
@@ -83,7 +83,7 @@ public class DeduplicatorApp {
         }
     }
 
-    private static void generateWriterReport(int uniqueValues, int duplicates, long timeOfOriginalDataWriting, long timeOfHashedDataWriting, long folderSize) {
+    private static void generateWriterReport(int uniqueValues, int duplicates, long timeOfHashedDataWriting, long folderSize) {
         StringBuilder builder = new StringBuilder()
             .append("\nWRITING:")
             .append("\nBlock's size: ").append(BLOCK_SIZE)
@@ -91,7 +91,6 @@ public class DeduplicatorApp {
             .append("\nUnique values: ").append(uniqueValues)
             .append("\nDuplicates: ").append(duplicates)
             .append("\nFolder size: ").append(folderSize)
-            .append("\nTime of original data writing: ").append(timeOfOriginalDataWriting)
             .append("\nTime of ").append(hashGenerator.getHashName()).append(": ").append(hashGenerator.getTime() + timeOfHashedDataWriting);
         try (PrintWriter bw = new PrintWriter(new BufferedWriter(new FileWriter(REPORT_PATH, true)))) {
             bw.println(builder.toString());
@@ -101,11 +100,10 @@ public class DeduplicatorApp {
         }
     }
 
-    private static void generateReaderReport(int errorCount, long timeOfOriginalDataReading, long timeOfHashedDataReading, int storageSize) {
+    private static void generateReaderReport(int errorCount, long timeOfHashedDataReading, int storageSize) {
         StringBuilder builder = new StringBuilder()
             .append("\nREADING:")
             .append("\nError count: ").append(errorCount)
-            .append("\nTime of original data reading: ").append(timeOfOriginalDataReading)
             .append("\nTime of hashed data reading: ").append(timeOfHashedDataReading)
             .append("\nBD storage size: ").append(storageSize);
 

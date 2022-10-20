@@ -4,36 +4,29 @@ import deduplicator.db.DbClient;
 import deduplicator.hash.HashGeneratorWithTimer;
 import org.apache.commons.compress.compressors.lz4.BlockLZ4CompressorOutputStream;
 
-import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
 public class WriterService {
     private final HashGeneratorWithTimer hashGenerator;
     private final String hashedPath;
-    private final String originalPath;
 
-    private long timeOfOriginalDataWriting = 0;
     private long timeOfHashedDataWriting = 0;
     private int uniqueValues = 0;
     private int duplicates = 0;
 
-    public WriterService(HashGeneratorWithTimer hashGenerator, String hashedPath, String originalPath) {
+    public WriterService(HashGeneratorWithTimer hashGenerator, String hashedPath) {
         this.hashGenerator = hashGenerator;
         this.hashedPath = hashedPath;
-        this.originalPath = originalPath;
     }
 
     public void startWriting(int blockSize, int maxPositionInFile, String separator, String dataPath, DbClient client) {
         Set<String> uniqueValues = new HashSet<>();
         StringBuilder stringBuilderHash = new StringBuilder();
-        StringBuilder stringBuilderOriginal = new StringBuilder();
 
         int file = 0;
         int position = 0;
@@ -42,7 +35,6 @@ public class WriterService {
             while (is.read(chunk) != -1) {
                 String data = new String(chunk);
                 uniqueValues.add(data);
-                stringBuilderOriginal.append(data);
                 long t1 = System.nanoTime();
                 String hash = hashGenerator.getHash(data);
                 boolean isHashExists = client.isElementPresent(hash, hashGenerator.getHashName());
@@ -56,24 +48,21 @@ public class WriterService {
                 }
                 hashGenerator.addTime(System.nanoTime() - t1);
                 position++;
-//                if (position > maxPositionInFile) {
-//                    position = 0;
-//                    writeToFile(stringBuilderOriginal.toString(), stringBuilderHash.toString(), file);
-//                    file++;
-//                }
+                if (position > maxPositionInFile) {
+                    position = 0;
+                    writeToFile(stringBuilderHash.toString(), file);
+                    file++;
+                }
             }
-            writeToFile(stringBuilderOriginal.toString(), stringBuilderHash.toString(), file);
+            writeToFile(stringBuilderHash.toString(), file);
         } catch (IOException e) {
             e.printStackTrace();
         }
         this.uniqueValues = uniqueValues.size();
     }
 
-    private void writeToFile(String data, String hashData, int file) {
+    private void writeToFile(String hashData, int file) {
         long t1 = System.nanoTime();
-//        writeDataToFile(data, file, originalPath);
-//        timeOfOriginalDataWriting += System.nanoTime() - t1;
-//        t1 = System.nanoTime();
         writeDataToFile(hashData, file, hashedPath + hashGenerator.getHashName() + "/");
         timeOfHashedDataWriting += System.nanoTime() - t1;
     }
@@ -86,10 +75,6 @@ public class WriterService {
         }
     }
 
-    public long getTimeOfOriginalDataWriting() {
-        return timeOfOriginalDataWriting;
-    }
-
     public long getTimeOfHashedDataWriting() {
         return timeOfHashedDataWriting;
     }
@@ -97,6 +82,7 @@ public class WriterService {
     public int getUniqueValues() {
         return uniqueValues;
     }
+
     public int getDuplicates() {
         return duplicates;
     }
