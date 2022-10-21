@@ -29,8 +29,8 @@ public class DeduplicatorApp {
     public static final String REPORT_PATH = "./report";
 
     public static void main(String[] args) {
-        List<Integer> blockSizes = List.of(16, 32, 64);
-        List<Integer> maxPositionsInFile = List.of(20);
+        List<Integer> blockSizes = List.of(3, 4, 6, 8, 16, 32, 64);
+        List<Integer> maxPositionsInFile = List.of(256, 2048, 100000);
         List<HashGeneratorWithTimer> generators = List.of(MURMUR.generator);
         for (HashGeneratorWithTimer g : generators) {
             hashGenerator = g;

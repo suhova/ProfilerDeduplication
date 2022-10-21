@@ -51,10 +51,13 @@ public class WriterService {
                 if (position > maxPositionInFile) {
                     position = 0;
                     writeToFile(stringBuilderHash.toString(), file);
+                    stringBuilderHash = new StringBuilder();
                     file++;
                 }
             }
-            writeToFile(stringBuilderHash.toString(), file);
+            if (stringBuilderHash.length() != 0){
+                writeToFile(stringBuilderHash.toString(), file);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
