@@ -16,7 +16,7 @@ import java.util.List;
 import static deduplicator.hash.HashGenerators.*;
 
 public class DeduplicatorApp {
-    private static boolean CALCULATE_MISTAKES = false;
+    private static boolean CALCULATE_MISTAKES = true;
     public static int BLOCK_SIZE;
     private static int MAX_POSITION_IN_FILE;
     private static HashGeneratorWithTimer hashGenerator;
@@ -29,8 +29,8 @@ public class DeduplicatorApp {
     public static final String REPORT_PATH = "./report";
 
     public static void main(String[] args) {
-        List<Integer> blockSizes = List.of(3, 4, 6, 8, 16, 32, 64);
-        List<Integer> maxPositionsInFile = List.of(256, 2048, 100000);
+        List<Integer> blockSizes = List.of(64);
+        List<Integer> maxPositionsInFile = List.of(1, 16, 64);
         List<HashGeneratorWithTimer> generators = List.of(MURMUR.generator);
         for (HashGeneratorWithTimer g : generators) {
             hashGenerator = g;
@@ -57,6 +57,7 @@ public class DeduplicatorApp {
             System.out.println("Can't create db client: " + e.getMessage());
             e.printStackTrace();
         }
+        hashGenerator.resetTime();
         client.clearCollection(hashGenerator.getHashName());
         File dir = new File(WAREHOUSE_PATH);
         File original = new File(ORIGINAL_PATH);

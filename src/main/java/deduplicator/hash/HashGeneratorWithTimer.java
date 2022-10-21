@@ -14,4 +14,6 @@ public abstract class HashGeneratorWithTimer implements HashGenerator {
     public long getTime() {
         return time;
     }
+
+    public void resetTime() {time = 0;}
 }
