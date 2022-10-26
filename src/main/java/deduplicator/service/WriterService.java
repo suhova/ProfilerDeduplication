@@ -33,7 +33,7 @@ public class WriterService {
         try (FileInputStream is = new FileInputStream(dataPath)) {
             byte[] chunk = new byte[blockSize];
             while (is.read(chunk) != -1) {
-                String data = new String(chunk).trim();
+                String data = new String(chunk);
                 uniqueValues.add(data);
                 long t1 = System.nanoTime();
                 String hash = hashGenerator.getHash(data);
@@ -57,7 +57,7 @@ public class WriterService {
                 chunk = new byte[blockSize];
             }
             if (stringBuilderHash.length() != 0){
-                writeToFile(stringBuilderHash.toString(), file);
+                writeToFile(stringBuilderHash.toString().replace("\0", ""), file);
             }
         } catch (IOException e) {
             e.printStackTrace();

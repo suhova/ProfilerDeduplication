@@ -16,7 +16,7 @@ import java.util.List;
 import static deduplicator.hash.HashGenerators.*;
 
 public class DeduplicatorApp {
-    private static boolean CALCULATE_MISTAKES = false;
+    private static boolean CALCULATE_MISTAKES = true;
     public static int BLOCK_SIZE;
     private static int MAX_POSITION_IN_FILE;
     private static HashGeneratorWithTimer hashGenerator;

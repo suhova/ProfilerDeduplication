@@ -44,15 +44,15 @@ public class ReaderService {
                         while ((line = br.readLine()) != null) {
                             String expected = "";
                             if (is.read(chunk) != -1) {
-                                expected = new String(chunk);
+                                expected = new String(chunk).replace("\0", "");
                             }
                             String actual = getDataFromHash(br, separator, client, hashName, line, dir.getAbsolutePath());
                             dataFromHash.append(actual);
                             if (!actual.equals(expected)) {
                                 errorCount++;
                                 System.out.println("ErrorCnt=" + errorCount + "\n Expected block: " + expected + ", actual: " + actual);
-                                throw new RuntimeException();
                             }
+                            chunk = new byte[blockSize];
                         }
                     } else {
                         String line;
