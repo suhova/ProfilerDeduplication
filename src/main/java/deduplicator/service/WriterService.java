@@ -54,6 +54,7 @@ public class WriterService {
                     stringBuilderHash = new StringBuilder();
                     file++;
                 }
+                chunk = new byte[blockSize];
             }
             if (stringBuilderHash.length() != 0){
                 writeToFile(stringBuilderHash.toString(), file);

@@ -16,7 +16,7 @@ import java.util.List;
 import static deduplicator.hash.HashGenerators.*;
 
 public class DeduplicatorApp {
-    private static boolean CALCULATE_MISTAKES = true;
+    private static boolean CALCULATE_MISTAKES = false;
     public static int BLOCK_SIZE;
     private static int MAX_POSITION_IN_FILE;
     private static HashGeneratorWithTimer hashGenerator;
@@ -29,9 +29,11 @@ public class DeduplicatorApp {
     public static final String REPORT_PATH = "./report";
 
     public static void main(String[] args) {
+        /** Парамтеры запуска*/
         List<Integer> blockSizes = List.of(64);
-        List<Integer> maxPositionsInFile = List.of(1, 16, 64);
+        List<Integer> maxPositionsInFile = List.of(64);
         List<HashGeneratorWithTimer> generators = List.of(MURMUR.generator);
+        /**<------------------------------->*/
         for (HashGeneratorWithTimer g : generators) {
             hashGenerator = g;
             for (int bs : blockSizes) {
